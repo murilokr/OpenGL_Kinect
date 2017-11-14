@@ -1,0 +1,3 @@
+/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/CMakeFiles/edit_cache.dir
+/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/CMakeFiles/rebuild_cache.dir
+/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/CMakeFiles/engine.dir
