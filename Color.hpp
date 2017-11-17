@@ -18,95 +18,68 @@ namespace Color{
         return color;
     }
 
-    float* White(){
-        float* color = new float(4);
+    float White[] = {
+        1.0f,
+        1.0f,
+        1.0f,
+        1.0f
+    };
 
-        color[0] = 1.0f;
-        color[1] = 1.0f;
-        color[2] = 1.0f;
-        color[3] = 1.0f;
-        return color;
-    }
+    float Black[] = {
+        0.0f,
+        0.0f,
+        0.0f,
+        1.0f
+    };
 
-    float* Black(){
-        float* color = new float(4);
+    float Red[] = {
+        1.0f,
+        0.0f,
+        0.0f,
+        1.0f
+    };
 
-        color[0] = 0.0f;
-        color[1] = 0.0f;
-        color[2] = 0.0f;
-        color[3] = 1.0f;
-        return color;
-    }
+    float Green[] = {
+        0.0f,
+        1.0f,
+        0.0f,
+        1.0f
+    };
 
-    float* Red(){
-        float* color = new float(4);
+    float Blue[] = {
+        0.0f,
+        0.0f,
+        1.0f,
+        1.0f
+    };
 
-        color[0] = 1.0f;
-        color[1] = 0.0f;
-        color[2] = 0.0f;
-        color[3] = 1.0f;
-        return color;
-    }
+    float DarkBlue[] = {
+        0.0f,
+        0.2f,
+        0.4f,
+        1.0f
+    };
 
-    float* Green(){
-        float* color = new float(4);
+    float Cyan[] = {
+        0.0f,
+        1.0f,
+        1.0f,
+        1.0f
+    };
 
-        color[0] = 0.0f;
-        color[1] = 1.0f;
-        color[2] = 0.0f;
-        color[3] = 1.0f;
-        return color;
-    }
+    float Yellow[] = {
+        1.0f,
+        1.0f,
+        0.0f,
+        1.0f
+    };
 
-    float* Blue(){
-        float* color = new float(4);
-
-        color[0] = 0.0f;
-        color[1] = 0.0f;
-        color[2] = 1.0f;
-        color[3] = 1.0f;
-        return color;
-    }
-
-    float* DarkBlue(){
-        float* color = new float(4);
-
-        color[0] = 0.0f;
-        color[1] = 0.2f;
-        color[2] = 0.4f;
-        color[3] = 1.0f;
-        return color;
-    }
-
-    float* Cyan(){
-        float* color = new float(4);
-
-        color[0] = 0.0f;
-        color[1] = 1.0f;
-        color[2] = 1.0f;
-        color[3] = 1.0f;
-        return color;
-    }
-
-    float* Yellow(){
-        float* color = new float(4);
-
-        color[0] = 1.0f;
-        color[1] = 1.0f;
-        color[2] = 0.0f;
-        color[3] = 1.0f;
-        return color;
-    }
-
-    float* Pink(){
-        float* color = new float(4);
-
-        color[0] = 1.0f;
-        color[1] = 0.0f;
-        color[2] = 1.0f;
-        color[3] = 1.0f;
-        return color;
-    }
+    float Pink[] = {
+        1.0f,
+        0.0f,
+        1.0f,
+        1.0f
+    };
 
     void ColorToGL(float* color){
         float r = color[0];

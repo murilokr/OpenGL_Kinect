@@ -4,7 +4,6 @@
 CMakeFiles/engine.dir/Source.cpp.o: Color.hpp
 CMakeFiles/engine.dir/Source.cpp.o: GlobalsDefines.hpp
 CMakeFiles/engine.dir/Source.cpp.o: Mesh.hpp
-CMakeFiles/engine.dir/Source.cpp.o: Parser.hpp
 CMakeFiles/engine.dir/Source.cpp.o: Renderer.hpp
 CMakeFiles/engine.dir/Source.cpp.o: Shader.hpp
 CMakeFiles/engine.dir/Source.cpp.o: Source.cpp

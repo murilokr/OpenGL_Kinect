@@ -1,13 +1,16 @@
 #ifndef _MESH_H
 #define _MESH_H
 
-#include "Renderer.hpp"
+#include "Shader.hpp"
 #include <math.h>
 #include <fstream>
 #include <vector>
 #include <string>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 
-#define GLEW_STATIC
+//#define GLEW_STATIC
 
 
 namespace MeshData{
@@ -35,7 +38,7 @@ namespace MeshData{
         }
 
         Vertex(){
-            color = Color::White();
+            color = Color::White;
         }
     }Vertex;
 
@@ -44,100 +47,68 @@ namespace MeshData{
     class Mesh{
         private:
         list<Vertex> *vertices;
-        vector<Vertex> m_vertices;
+        //vector<Vertex> m_vertices;
+        vector<glm::vec3> m_vertices;
         vector<unsigned int> m_indices;
         
+        GLuint shaderProgram;
+        GLuint MatrixMVPHandle;
         GLenum drawMode;
         float dT;
 
         public:
-            GLfloat posX, posY, posZ;
+            GLuint vertexBuffer; //Buffer para os vertices
+            GLuint elementBuffer; //Buffer para os indices
+            glm::vec3 position;
+            glm::vec3 rotation;
+            glm::vec3 scale;
 
             Mesh(list<Vertex> *vert, GLenum dm) : vertices(vert), drawMode(dm), dT(0.0){}
             Mesh() {
                 this->vertices = new list<Vertex>();
                 drawMode = GL_TRIANGLES;
-                posX = 0.0f;
-                posY = 0.0f;
-                posZ = 0.0f;
+                position = glm::vec3(0,0,0);
+                rotation = glm::vec3(0,0,0);
+                scale = glm::vec3(0,0,0);
             }
 
             ~Mesh(){
                 SafeDelete(vertices);
+                glDeleteProgram(shaderProgram);
+                glDeleteBuffers(1, &vertexBuffer);
+                glDeleteBuffers(1, &elementBuffer);
             }
 
-            list<Vertex>* returnVertices(){return this->vertices;}
-            void setVertices(list<Vertex>* vert){this->vertices = vert;}
+            glm::mat4 modelMatrix(){
+                return glm::translate(glm::mat4(), position);
+            }
 
-            GLenum getDrawMode(){return this->drawMode;}
-            void setDrawMode(GLenum dm){this->drawMode = dm;}
-
-
-            void draw(){
-
-                static const GLfloat g_vertex_buffer_data[] = {
-                    -1.0f, -1.0f, 0.0f,
-                    1.0f, -1.0f, 0.0f,
-                    0.0f,  1.0f, 0.0f,
-                };
-                GLuint vertexbuffer;
-                glGenBuffers(1, &vertexbuffer);
-                glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-                glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-
-                glEnableVertexAttribArray(0);
-                glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-                glVertexAttribPointer(
-                    0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-                    3,                  // size
-                    GL_FLOAT,           // type
-                    GL_FALSE,           // normalized?
-                    0,                  // stride
-                    (void*)0            // array buffer offset
-                );
-                // Draw the triangle !
-                glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
-                glDisableVertexAttribArray(0);
-
+            void draw(glm::mat4 mvp){
+                glUseProgram(shaderProgram);
                 
-                /*
-                GLuint vertexbuffer;
-                glGenBuffers(1, &vertexbuffer);
-                glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-                glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), &m_vertices[0], GL_STATIC_DRAW);
+                //Passar a matriz MVP para o shader
+                glUniformMatrix4fv(MatrixMVPHandle, 1, GL_FALSE, &mvp[0][0]);
+
+
                 glEnableVertexAttribArray(0);
-                glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+                glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
                 glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0);
-                glDrawArrays(GL_TRIANGLES, 0, m_vertices.size() - 1);
+
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+
+                glDrawElements(
+                    drawMode,
+                    m_indices.size(),
+                    GL_UNSIGNED_INT,
+                    (void*)0
+                );
+
+
                 glDisableVertexAttribArray(0);
-                */
-                /*
-                glTranslatef(posX, posY, posZ);
-                glBegin(drawMode);
-                
-                GLfloat vX, vY, vZ;
-                GLfloat nX, nY, nZ;
-                float r, g, b, a;
-
-                for(list<Vertex>::iterator vertice = vertices->begin(); vertice != vertices->end(); ++vertice){
-                    vX = (*vertice).position.x;
-                    vY = (*vertice).position.y;
-                    vZ = (*vertice).position.z;
-
-                    nX = (*vertice).normal.x;
-                    nY = (*vertice).normal.y;
-                    nZ = (*vertice).normal.z;
-
-                    glVertex3f(vX,vY,vZ);
-                    glNormal3f(nX,nY,nZ);
-
-                    Color::ColorToGL((*vertice).color);
-                }*/
-                //glEnd();
             }
 
 
-            bool load(string modelname){
+            bool load(string modelname, const char* vertexshader_path, const char* fragshader_path){
                 if(modelname == "")
                     return false;
                 
@@ -176,7 +147,9 @@ namespace MeshData{
 
                 file.close();
 
-                //build();
+                shaderProgram = Shader::LoadShaders(vertexshader_path, fragshader_path);
+
+                build();
                 return true;
             }
 
@@ -184,16 +157,22 @@ namespace MeshData{
                 if(m_vertices.size() == 0 || m_indices.size() == 0)
                     return;
 
-                GLuint elementBuffer;
+                glGenBuffers(1, &vertexBuffer);
+                glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+                glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), &m_vertices[0], GL_STATIC_DRAW);
+
+                glGenBuffers(1, &elementBuffer);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), &m_indices[0], GL_STATIC_DRAW);
+
+                MatrixMVPHandle = glGetUniformLocation(shaderProgram, "MVP");
             }
 
             void update(){
-                dT += 0.025f;
-                float radius = 2.5f;
-
-                posX = cos(dT) * radius;
-                posY = sin(dT) * radius;
             }
+
+            GLenum getDrawMode(){return this->drawMode;}
+            void setDrawMode(GLenum dm){this->drawMode = dm;}
     };
 
 }

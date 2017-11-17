@@ -15,8 +15,8 @@ iostream
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/GlobalsDefines.hpp
 
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Mesh.hpp
-Renderer.hpp
-/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Renderer.hpp
+Shader.hpp
+/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Shader.hpp
 math.h
 -
 fstream
@@ -25,15 +25,11 @@ vector
 -
 string
 -
-
-/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Parser.hpp
-Mesh.hpp
-/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Mesh.hpp
-iostream
+glm/glm.hpp
 -
-string
+glm/gtc/matrix_transform.hpp
 -
-fstream
+glm/gtx/transform.hpp
 -
 
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Renderer.hpp
@@ -49,26 +45,36 @@ iostream
 -
 list
 -
+math.h
+-
+glm/glm.hpp
+-
+glm/gtc/matrix_transform.hpp
+-
+glm/gtx/transform.hpp
+-
+glm/gtx/string_cast.hpp
+-
 GlobalsDefines.hpp
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/GlobalsDefines.hpp
 Color.hpp
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Color.hpp
 Mesh.hpp
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Mesh.hpp
-math.h
--
+Shader.hpp
+/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Shader.hpp
 
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Shader.hpp
 GLFW/glfw3.h
+-
+fstream
+-
+vector
 -
 
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Source.cpp
 Renderer.hpp
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Renderer.hpp
-Parser.hpp
-/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Parser.hpp
-Shader.hpp
-/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Shader.hpp
 GLFW/glfw3.h
 -
 

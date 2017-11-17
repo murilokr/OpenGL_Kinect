@@ -1,23 +1,37 @@
 #ifndef _RENDERER_H
 #define _RENDERER_H
 
+//*************************OPENGL*************************//
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <GL/gl.h>
 #include <GL/glut.h>
+
+//*************************C++*************************//
 #include <iostream>
 #include <list>
+#include <math.h>
 
+//*************************GLM*************************//
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtx/string_cast.hpp>
+
+//*************************LOCALS*************************//
 #include "GlobalsDefines.hpp"
 #include "Color.hpp"
 #include "Mesh.hpp"
-#include <math.h>
+#include "Shader.hpp"
 
+//*************************DEFINES*************************//
 #define GLEW_STATIC
 #define GL_GLEXT_PROTOTYPES
 
+//*************************NAMESPACES*************************//
 using namespace std;
 using namespace MeshData;   
+using namespace glm;
 
 
 
@@ -25,11 +39,12 @@ class Renderer{
     private:
         list<Mesh*>* mesh3D;
         list<Mesh*>* mesh2D;
-        //static Renderer* currentInstance;
+        GLuint VertexArrayID;
+        GLFWwindow* window;
 
-        void drawCallback();   
-        void setupDrawCallback();
         int winH, winW;
+
+        glm::mat4 View; //Camera view (fazer a da classe ainda) PLACEHOLDER**************8
         
 
     public:
@@ -38,6 +53,8 @@ class Renderer{
         ~Renderer(){
             SafeDelete(mesh3D);
             SafeDelete(mesh2D);
+
+            glDeleteVertexArrays(1, &VertexArrayID);
         }
 
 
@@ -50,108 +67,104 @@ class Renderer{
             glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
         }
 
-        bool initializeOpenGL(int argc, char* argv[]){
-            glutInit(&argc, argv);
-            glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
-            glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-            glutInitWindowPosition(450, 300);
-            glutCreateWindow("OpenGL 3D Engine");
-
-            if(glewInit() != GLEW_OK)
+        bool initializeOpenGL(){
+            if(!glfwInit())
                 return false;
-            this->setupDrawCallback();
-            setClearColor(Color::DarkBlue());
-            return true;
+
+            glfwWindowHint(GLFW_SAMPLES, 4);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+            glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+            
+            window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
+            if( window == NULL ){
+                fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
+                glfwTerminate();
+                return -1;
+            }
+
+            glfwMakeContextCurrent(window);
+            glewExperimental = true;
+            if(glewInit() != GLEW_OK){
+                fprintf(stderr, "Failed to initialize GLEW\n");
+                return -1;
+            }
+
+            glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+            glfwSetWindowSizeCallback(window, resizeWindowCallback);
+
+                // Dark blue background
+            setClearColor(Color::DarkBlue);
+
+            glGenVertexArrays(1, &VertexArrayID);
+            glBindVertexArray(VertexArrayID);
         }
 
         void loop(){
-            glutMainLoop();
-        }
+            do{
+                //this->update();
+                this->draw();
 
+            }while(glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
 
-        void resize(int w, int h){
-            winH = h;
-            winW = w;
+            glfwTerminate();
         }
 
         void update(){
             for(list<Mesh*>::iterator mesh = mesh3D->begin(); mesh != mesh3D->end(); ++mesh)
                 (*mesh)->update();
-                
-            glutPostRedisplay();
         }
 
 
         void draw(){
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            glEnable(GL_DEPTH_TEST);
-            //glEnable(GL_LIGHTING);
             
-
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LESS);
+            
+            View = glm::lookAt(glm::vec3(4,3,3),glm::vec3(0,0,0),glm::vec3(0,1,0));
             render3D();
+            //render2D();
 
-            glDisable(GL_DEPTH_TEST);
-            //glDisable(GL_LIGHTING);
-
-            render2D();
-
-            glutSwapBuffers();
+            glfwSwapBuffers(window);
+            glfwPollEvents();
         }
 
         void render3D(){
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            gluPerspective(45, (winH==0)?(1):((float)winW/winH), 1, 100);
-            
-            glMatrixMode(GL_MODELVIEW);
-            glPushMatrix();
-            glLoadIdentity();
+            if(mesh3D->size() == 0)
+                return;
 
-            gluLookAt(0,0,-15,0,0,0,0,1,0);
-            for(list<Mesh*>::iterator mesh = mesh3D->begin(); mesh != mesh3D->end(); ++mesh)
-                (*mesh)->draw();
+            glm::mat4 Projection = glm::perspective(glm::radians(90.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f);
+            glm::mat4 Model;
+            glm::mat4 mvp;
 
-            glPopMatrix();
+            for(list<Mesh*>::iterator mesh = mesh3D->begin(); mesh != mesh3D->end(); ++mesh){
+                Model = (*mesh)->modelMatrix();
+
+                mvp = Projection * View * Model;
+                (*mesh)->draw(mvp);
+            }
         }
 
         void render2D(){
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            gluOrtho2D(-1.0f, 1.0f, -1.0f, 1.0f);
-            
-            
-            glMatrixMode(GL_MODELVIEW);
-            glPushMatrix();
-            glLoadIdentity();
+            if(mesh2D->size() == 0)
+                return;
 
-            glPopMatrix();
+            glm::mat4 Projection = glm::ortho(-10.0f,10.0f,-10.0f,10.0f,0.0f,100.0f);
+            glm::mat4 Model = glm::mat4(1.0f);
+            glm::mat4 mvp = Projection * View * Model;
         }
 
+
+
+        static void resizeWindowCallback(GLFWwindow *window, int width, int height){
+            WINDOW_WIDTH = width;
+            WINDOW_HEIGHT = height;
+            glViewport(0, 0, width, height);
+        }
 };
-
-Renderer* currentInstance;
-
-extern "C"
-void drawCallback(){
-    currentInstance->draw();
-}
-
-extern "C"
-void resizeCallback(int w, int h){
-    currentInstance->resize(w, h);
-}
-
-extern "C"
-void updateCallback(){
-    currentInstance->update();
-}
-
-void Renderer::setupDrawCallback(){
-    ::currentInstance = this;
-    ::glutDisplayFunc(::drawCallback);
-    ::glutReshapeFunc(::resizeCallback);
-    ::glutIdleFunc(::updateCallback);
-}
 
 #endif //_RENDERER_H

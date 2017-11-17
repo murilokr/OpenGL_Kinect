@@ -1,6 +1,7 @@
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
+const char* WINDOW_TITLE = "OpenGL 3D HolyEngine";
 
+int WINDOW_WIDTH = 1024;
+int WINDOW_HEIGHT = 768;
 
 #define SafeDelete(obj) \
     if(obj != NULL) { \

@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "cmath": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "initializer_list": "cpp",
+        "list": "cpp"
     }
 }
