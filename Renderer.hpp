@@ -98,14 +98,15 @@ class Renderer{
 
                 // Dark blue background
             setClearColor(Color::DarkBlue);
-
+            
             glGenVertexArrays(1, &VertexArrayID);
             glBindVertexArray(VertexArrayID);
+            return true;
         }
 
         void loop(){
             do{
-                //this->update();
+                this->update();
                 this->draw();
 
             }while(glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);

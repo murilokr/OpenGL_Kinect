@@ -1,5 +1,5 @@
 VertexCount: 3
-TriangleCount: 1
+TriangleCount: 3
 VertexList (pos, normal)
 {
     -1.0 -1.0 0.0 0.0 0.0 -1.0

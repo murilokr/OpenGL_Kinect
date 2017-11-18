@@ -3,7 +3,7 @@
 
 int main(int argc, char* argv[]){
     Renderer *renderer = new Renderer();
-    if(renderer->initializeOpenGL()){
+    if(!renderer->initializeOpenGL()){
         cerr << "Erro ao inicializar o OpenGL" << endl;
         return -1;
     }
@@ -11,7 +11,7 @@ int main(int argc, char* argv[]){
     list<Mesh*>* meshes = new list<Mesh*>();
     Mesh* caveira = new Mesh();
     caveira->setDrawMode(GL_TRIANGLES);
-    caveira->load("./Models/carTrue.txt", "./Shaders/SimpleVertexShader.vertexshader", "./Shaders/SimpleFragmentShader.fragmentshader");
+    caveira->load("./Models/skullTrue.txt", "./Shaders/SimpleVertexShader.vertexshader", "./Shaders/SimpleFragmentShader.fragmentshader");
 
     meshes->push_back(caveira);
     renderer->set3DMeshes(meshes);
