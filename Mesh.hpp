@@ -142,7 +142,7 @@ namespace MeshData{
                 unsigned int triangleCount = nIndex;
                 nIndex *= 3;
                 m_indices.resize(nIndex);
-                for(unsigned int i = 0; i < triangleCount / 3; ++i){
+                for(unsigned int i = 0; i < triangleCount; ++i){
                     file >> m_indices[i * 3 + 0] >> m_indices[i * 3 + 1] >> m_indices[i * 3 + 2];
                 }
 

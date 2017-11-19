@@ -126,7 +126,7 @@ class Renderer{
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
             
-            View = glm::lookAt(glm::vec3(4,3,3),glm::vec3(0,0,0),glm::vec3(0,1,0));
+            View = glm::lookAt(glm::vec3(4,3,-5),glm::vec3(0,0,0),glm::vec3(0,1,0));
             render3D();
             //render2D();
 
