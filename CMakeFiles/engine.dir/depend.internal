@@ -4,8 +4,10 @@
 CMakeFiles/engine.dir/Source.cpp.o
  /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Color.hpp
  /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/GlobalsDefines.hpp
+ /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Light.hpp
  /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Mesh.hpp
  /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Renderer.hpp
  /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Shader.hpp
  /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Source.cpp
+ /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Utils.hpp
  /usr/local/include/GLFW/glfw3.h

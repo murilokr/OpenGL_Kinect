@@ -5,7 +5,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <GL/gl.h>
-#include <GL/glut.h>
 
 //*************************C++*************************//
 #include <iostream>
@@ -19,10 +18,12 @@
 #include <glm/gtx/string_cast.hpp>
 
 //*************************LOCALS*************************//
+#include "Utils.hpp"
 #include "GlobalsDefines.hpp"
 #include "Color.hpp"
 #include "Mesh.hpp"
 #include "Shader.hpp"
+#include "Light.hpp"
 
 //*************************DEFINES*************************//
 #define GLEW_STATIC
@@ -48,11 +49,13 @@ class Renderer{
         
 
     public:
+        list<Light*>* lights;
 
         Renderer() : winW(WINDOW_WIDTH), winH(WINDOW_HEIGHT){}
         ~Renderer(){
             SafeDelete(mesh3D);
             SafeDelete(mesh2D);
+            SafeDelete(lights);
 
             glDeleteVertexArrays(1, &VertexArrayID);
         }
@@ -104,6 +107,12 @@ class Renderer{
             return true;
         }
 
+        void updateLights(Mesh* mesh){
+            GLuint meshShader = mesh->getShader();
+            GLuint lightPositionID = glGetUniformLocation(meshShader, "luzPosition");
+            glUniform3f(lightPositionID, 0.0f, 5.0f, -3.0f);
+        }
+
         void loop(){
             do{
                 this->update();
@@ -143,11 +152,14 @@ class Renderer{
             glm::mat4 mvp;
 
             for(list<Mesh*>::iterator mesh = mesh3D->begin(); mesh != mesh3D->end(); ++mesh){
+                updateLights((*mesh));
                 Model = (*mesh)->modelMatrix();
 
                 mvp = Projection * View * Model;
-                (*mesh)->draw(mvp);
+                (*mesh)->draw(mvp, View);
             }
+
+            cout << endl << endl << endl << endl;
         }
 
         void render2D(){

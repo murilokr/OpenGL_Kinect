@@ -2,8 +2,37 @@
 
 // Ouput data
 out vec3 color;
-in vec3 pos;
+
+in vec3 pos; // by vertex
+in vec3 normal; // by vertex
+in vec3 olhoDirection; 
+in vec3 luzDirection;
+
+uniform vec3 luzPosition;
+
 
 void main(){
-	color = pos;
+
+	vec3 corLuz = vec3(1,1,1);
+	float intensity = 15.0f;
+
+	vec4 MaterialAmbient = vec4(0.3, 0.3, 0.3, 1.0);
+	vec4 MaterialDiffuse = vec4(0.8, 0.8, 0.8, 1.0);
+	vec4 MaterialSpecular = vec4(0.8, 0.8, 0.8, 16.0);
+
+	float distance = length(luzPosition - pos);
+
+	vec3 n = normalize(normal);
+	vec3 d = normalize(olhoDirection);
+	vec3 l = normalize(luzDirection);
+
+	float cosTheta = clamp(dot(n, l), 0, 1);
+
+	vec3 v = reflect(-l,n);
+	float especValue = pow(max(dot(v,d), 0.0f), 16);//clamp(dot(v,d), 0, 1);
+
+	color = MaterialAmbient.xyz + 
+			MaterialDiffuse.xyz * corLuz * intensity * cosTheta / (distance*distance) +
+			MaterialSpecular.xyz * corLuz * intensity * especValue / (distance*distance);
+	//color = pos;
 }

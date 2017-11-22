@@ -14,14 +14,30 @@ iostream
 
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/GlobalsDefines.hpp
 
+/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Light.hpp
+glm/glm.hpp
+-
+glm/gtc/matrix_transform.hpp
+-
+Color.hpp
+/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Color.hpp
+Shader.hpp
+/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Shader.hpp
+
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Mesh.hpp
 Shader.hpp
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Shader.hpp
+Utils.hpp
+/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Utils.hpp
+Light.hpp
+/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Light.hpp
 math.h
 -
 fstream
 -
 vector
+-
+list
 -
 string
 -
@@ -31,6 +47,10 @@ glm/gtc/matrix_transform.hpp
 -
 glm/gtx/transform.hpp
 -
+stdio.h
+-
+string.h
+-
 
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Renderer.hpp
 GL/glew.h
@@ -38,8 +58,6 @@ GL/glew.h
 GLFW/glfw3.h
 -
 GL/gl.h
--
-GL/glut.h
 -
 iostream
 -
@@ -55,6 +73,8 @@ glm/gtx/transform.hpp
 -
 glm/gtx/string_cast.hpp
 -
+Utils.hpp
+/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Utils.hpp
 GlobalsDefines.hpp
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/GlobalsDefines.hpp
 Color.hpp
@@ -63,6 +83,8 @@ Mesh.hpp
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Mesh.hpp
 Shader.hpp
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Shader.hpp
+Light.hpp
+/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Light.hpp
 
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Shader.hpp
 GLFW/glfw3.h
@@ -76,6 +98,10 @@ vector
 Renderer.hpp
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Renderer.hpp
 GLFW/glfw3.h
+-
+
+/home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Utils.hpp
+string
 -
 
 /usr/local/include/GLFW/glfw3.h
