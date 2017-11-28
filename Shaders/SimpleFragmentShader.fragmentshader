@@ -7,6 +7,7 @@ in vec3 pos; // by vertex
 in vec3 normal; // by vertex
 in vec3 olhoDirection; 
 in vec3 luzDirection;
+in vec3 colorV;
 
 uniform vec3 luzPosition;
 
@@ -14,7 +15,7 @@ uniform vec3 luzPosition;
 void main(){
 
 	vec3 corLuz = vec3(1,1,1);
-	float intensity = 15.0f;
+	float intensity = 10.0f;
 
 	vec4 MaterialAmbient = vec4(0.3, 0.3, 0.3, 1.0);
 	vec4 MaterialDiffuse = vec4(0.8, 0.8, 0.8, 1.0);
@@ -29,10 +30,9 @@ void main(){
 	float cosTheta = clamp(dot(n, l), 0, 1);
 
 	vec3 v = reflect(-l,n);
-	float especValue = pow(max(dot(v,d), 0.0f), 16);//clamp(dot(v,d), 0, 1);
+	float especValue = pow(max(dot(v,d), 0.0f), 16);
 
 	color = MaterialAmbient.xyz + 
 			MaterialDiffuse.xyz * corLuz * intensity * cosTheta / (distance*distance) +
 			MaterialSpecular.xyz * corLuz * intensity * especValue / (distance*distance);
-	//color = pos;
 }

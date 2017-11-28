@@ -46,7 +46,7 @@ class Renderer{
         int winH, winW;
 
         glm::mat4 View; //Camera view (fazer a da classe ainda) PLACEHOLDER**************8
-        
+        list<Mesh*>::iterator selectedMesh;
 
     public:
         list<Light*>* lights;
@@ -61,7 +61,7 @@ class Renderer{
         }
 
 
-        void set3DMeshes(list<Mesh*>* meshes){mesh3D = meshes;}
+        void set3DMeshes(list<Mesh*>* meshes){mesh3D = meshes; selectedMesh = mesh3D->begin();}
         void set2DMeshes(list<Mesh*>* meshes){mesh2D = meshes;}
         list<Mesh*>* get3DMeshes(){return mesh3D;}
         list<Mesh*>* get2DMeshes(){return mesh2D;}
@@ -124,8 +124,17 @@ class Renderer{
         }
 
         void update(){
+            if(glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
+                (*selectedMesh)->isSelected = false;
+                selectedMesh++;
+                if(selectedMesh == mesh3D->end())
+                    selectedMesh = mesh3D->begin();
+            }
+            if(selectedMesh != mesh3D->end())
+                (*selectedMesh)->isSelected = true;
+
             for(list<Mesh*>::iterator mesh = mesh3D->begin(); mesh != mesh3D->end(); ++mesh)
-                (*mesh)->update();
+                (*mesh)->update(window);
         }
 
 
@@ -158,8 +167,6 @@ class Renderer{
                 mvp = Projection * View * Model;
                 (*mesh)->draw(mvp, View);
             }
-
-            cout << endl << endl << endl << endl;
         }
 
         void render2D(){

@@ -103,6 +103,12 @@ GLFW/glfw3.h
 /home/murilo/Documents/Periodo 8/ComputerGraphics/ProjetoOpenGL/Utils.hpp
 string
 -
+math.h
+-
+glm/glm.hpp
+-
+glm/gtx/transform.hpp
+-
 
 /usr/local/include/GLFW/glfw3.h
 stddef.h

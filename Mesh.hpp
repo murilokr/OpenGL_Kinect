@@ -54,6 +54,7 @@ namespace MeshData{
     class Mesh{
         private:
         vector<glm::vec3> m_vertex; //Vetor da posicao de cada vertex
+        vector<float*> m_colors; //Vetor da posicao de cada vertex
         vector<glm::vec2> m_uvs; //Vetor de UVS
         vector<glm::vec3> m_normals;
         
@@ -65,13 +66,16 @@ namespace MeshData{
 
         GLenum drawMode;
         float dT, angle;
+        float moveSpeed, rotateSpeed;
 
         public:
+            bool isSelected;
             vector<Vertex> m_vertices; //Vetor da estrutura Vertex
             vector<unsigned int> m_indices;
 
             GLuint vertexBuffer; //Buffer para os vertices
             GLuint normalBuffer; //Bufer para as normais
+            GLuint colorBuffer; //Bufer para as normais
             GLuint uvBuffer;     //Buffer para as UV's
             GLuint elementBuffer; //Buffer para os indices
             glm::vec3 position;
@@ -79,11 +83,13 @@ namespace MeshData{
             glm::vec3 scaleDim;
 
             Mesh(GLenum dm) : drawMode(dm), dT(0.0){}
-            Mesh() : dT(0.0), angle(0.0) {
+            Mesh() : dT(0.0), angle(0.0), isSelected(false) {
                 drawMode = GL_TRIANGLES;
                 position = glm::vec3(0,0,0);
                 rotation = glm::vec3(0,1,0);
                 scaleDim = glm::vec3(1,1,1);
+                moveSpeed = 0.25f;
+                rotateSpeed = 0.125f;
             }
 
             ~Mesh(){
@@ -91,6 +97,7 @@ namespace MeshData{
                 glDeleteBuffers(1, &vertexBuffer);
                 glDeleteBuffers(1, &normalBuffer);
                 glDeleteBuffers(1, &elementBuffer);
+                glDeleteBuffers(1, &colorBuffer);
                 glDeleteBuffers(1, &uvBuffer);
             }
 
@@ -127,6 +134,11 @@ namespace MeshData{
                 glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
                 glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,0,(void*)0);
 
+                //Vertex color
+                glEnableVertexAttribArray(2);
+                glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+                glVertexAttribPointer(2,3,GL_FLOAT,GL_FALSE,0,(void*)0);
+
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 
                 glDrawElements(
@@ -139,6 +151,7 @@ namespace MeshData{
 
                 glDisableVertexAttribArray(0);
                 glDisableVertexAttribArray(1);
+                glDisableVertexAttribArray(2);
             }
 
 
@@ -217,6 +230,7 @@ namespace MeshData{
 
                 m_vertex.resize(m_vertices.size());
                 m_normals.resize(m_vertices.size());
+                m_colors.resize(m_vertices.size());
                 int i = 0;
                 for(vector<Vertex>::iterator v = m_vertices.begin(); v != m_vertices.end(); ++v, ++i){
                     m_vertex[i].x = (*v).position.x;
@@ -226,6 +240,8 @@ namespace MeshData{
                     m_normals[i].x = (*v).normal.x;
                     m_normals[i].y = (*v).normal.y;
                     m_normals[i].z = (*v).normal.z;
+
+                    m_colors[i] = (*v).color;
                 }
 
                 //Atributo 1 (POSICAO)
@@ -238,8 +254,10 @@ namespace MeshData{
                 glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
                 glBufferData(GL_ARRAY_BUFFER, m_normals.size() * sizeof(glm::vec3), &m_normals[0], GL_STATIC_DRAW);
 
-                //Atributo 3 (UV)
-                //TODO
+                //Atributo 3 (COLOR)
+                glGenBuffers(1, &colorBuffer);
+                glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+                glBufferData(GL_ARRAY_BUFFER, m_vertex.size() * sizeof(float*), &m_colors[0], GL_STATIC_DRAW);
 
                 //Index Buffer
                 glGenBuffers(1, &elementBuffer);
@@ -252,8 +270,28 @@ namespace MeshData{
                 MatrixViewHandle = glGetUniformLocation(shaderProgram, "View");
             }
 
-            void update(){
-                dT += 0.025f;
+            void update(GLFWwindow* window){
+                if(!isSelected)
+                    return;
+
+                if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+                    position += glm::vec3(1,0,0) * moveSpeed;
+                if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+                    position -= glm::vec3(1,0,0) * moveSpeed;
+                if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+                    position += glm::vec3(0,0,1) * moveSpeed;
+                if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+                    position -= glm::vec3(0,0,1) * moveSpeed;
+                if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+                    position += glm::vec3(0,1,0) * moveSpeed;
+                if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+                    position -= glm::vec3(0,1,0) * moveSpeed;
+                if(glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+                    dT += rotateSpeed;
+                if(glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+                    dT -= rotateSpeed;
+                
+                //dT += 0.025f;
 
                 angle = cos(dT) * 2.5f;
             }
@@ -324,7 +362,6 @@ namespace Geometry{
 
             float stackAltura = height / nStack;
 
-            //Numero que determina o quanto eh preciso incrementar o raio, a cada vez q movemos para um level acima nos stacks.
             float deltaR = (bottomRadius - topRadius) / nStack;
 
 
@@ -335,8 +372,6 @@ namespace Geometry{
                 float y = -0.5f*height + i * stackAltura;
                 float r = bottomRadius + i * deltaR;
 
-
-                //Criando os vertices no anel
                 float dTheta = 2.0f*PI / nSlices;
 
                 for (unsigned int j = 0; j <= nSlices; ++j) {
@@ -376,6 +411,219 @@ namespace Geometry{
 
             buildCylinderHatch(bottomRadius, height, -0.5f, nSlices, modelo);
             buildCylinderHatch(topRadius, height, 0.5f, nSlices, modelo);
+        }
+
+        void generateGrid(float width, float depth, unsigned int m, unsigned int n, MeshData::Mesh& modelo){
+            unsigned int nVertex = m*n;
+            unsigned int nFaces = (m-1)*(n-1) * 2;
+
+            float widthHalf = width*0.5f;
+            float depthHalf = depth*0.5f;
+
+            float dx = width / (n-1);
+            float dz = depth / (m-1);
+
+
+            modelo.vertices()->resize(nVertex);
+            MeshData::Vertex vert;
+            for(unsigned int i = 0; i < m; ++i){
+                float z = depthHalf - i * dz;
+
+                for(unsigned int j = 0; j < n; ++j){
+                    float x = -widthHalf + j * dx;
+                    vert.position.x = x;
+                    vert.position.y = 0.0f;
+                    vert.position.z = z;
+                    modelo.vertices()->at(i*n + j) = vert;
+                }
+            }
+
+
+            modelo.indices()->resize(nFaces * 3);
+            unsigned int k = 0;
+            for(unsigned int i = 0; i < m-1; ++i){
+                for(unsigned int j = 0; j < n-1; ++j){
+                    modelo.indices()->at(k) = i*n + j;
+                    modelo.indices()->at(k + 1) = i*n + j + 1;
+                    modelo.indices()->at(k + 2) = (i + 1)*n + j;
+                    modelo.indices()->at(k + 3) = (i + 1)*n + j;
+                    modelo.indices()->at(k + 4) = i*n + j + 1;
+                    modelo.indices()->at(k + 5) = (i + 1)*n + j + 1;
+                    k += 6; // next quad
+                }
+            }
+        }
+
+        void generateCliff(float width, float depth, unsigned int m, unsigned int n, MeshData::Mesh& modelo){
+            generateGrid(width,depth,m,n,modelo);
+
+            std::vector<MeshData::Vertex> vertices(modelo.vertices()->size());
+
+            for(unsigned int i = 0; i < modelo.vertices()->size(); ++i){
+                glm::vec3 p = glm::vec3(modelo.vertices()->at(i).position.x,modelo.vertices()->at(i).position.y,modelo.vertices()->at(i).position.z);
+
+                p.y = getHeight(p.x,p.z);
+
+                vertices.at(i).position.x = p.x;
+                vertices.at(i).position.y = p.y;
+                vertices.at(i).position.z = p.z;
+
+                glm::vec3 n = getHillNormal(p.x, p.z);
+
+                vertices.at(i).normal.x = n.x;
+                vertices.at(i).normal.y = n.y;
+                vertices.at(i).normal.z = n.z;
+
+                if (p.y < -10.0f){
+                    float cor[4] = {1.0f, 0.96f, 0.62f, 1.0f}; 
+			        vertices[i].color = cor;
+                }
+		        else if (p.y < 5.0f){
+                    float cor[4] = {0.48f, 0.77f, 0.46f, 1.0f};
+			        vertices[i].color = cor;
+                }
+		        else if (p.y < 12.0f){
+			        float cor[4] = {0.1f, 0.48f, 0.19f, 1.0f};
+                    vertices[i].color = cor;
+                }
+		        else if (p.y < 20.0f){
+                    float cor[4] = {0.45f, 0.39f, 0.34f, 1.0f};
+			        vertices[i].color = cor;
+                }
+		        else{
+                    float cor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+			        vertices[i].color = cor; 
+                }
+            }
+            modelo.setVertices(vertices);
+        }
+
+
+        void geosphere(float radius, unsigned int nSubDivisions, MeshData::Mesh& modelo){
+            if (nSubDivisions < 5)
+                nSubDivisions = 5;
+
+            const float X = 0.525731f;
+            const float Z = 0.850651f;
+
+            glm::vec3 pos[12] = {
+                vec3(-X, 0.0f, Z), vec3(X, 0.0f, Z),
+                vec3(-X, 0.0f, -Z), vec3(X, 0.0f, -Z),
+                vec3(0.0f, Z, X), vec3(0.0f, Z, -X),
+                vec3(0.0f, -Z, X), vec3(0.0f, -Z, -X),
+                vec3(Z, X, 0.0f), vec3(-Z, X, 0.0f),
+                vec3(Z, -X, 0.0f), vec3(-Z, -X, 0.0f)
+            };
+
+            unsigned int k[60] = {
+                1,4,0, 4,9,0, 4,5,9, 8,5,4, 1,8,4,
+		        1,10,8, 10,3,8, 8,3,5, 3,2,5, 3,7,2,
+		        3,10,7, 10,6,7, 6,11,7, 6,0,11, 6,1,0,
+		        10,1,6, 11,0,9, 2,11,9, 5,2,9, 11,2,7
+            };
+
+
+            modelo.vertices()->resize(12);
+            modelo.indices()->resize(60);
+
+            for(unsigned int i = 0; i < 12; ++i){
+                modelo.vertices()->at(i).position.x = pos[i].x;
+                modelo.vertices()->at(i).position.y = pos[i].y;
+                modelo.vertices()->at(i).position.z = pos[i].z;
+            }
+            for(unsigned int i = 0; i < 60; ++i)
+                modelo.indices()->at(i) = k[i];
+            for(unsigned int i = 0; i < nSubDivisions; ++i)
+                subdivide(modelo);
+
+        	for (unsigned int i = 0; i < modelo.vertices()->size(); ++i) {
+                vec3 pos = vec3(0.0f,0.0f,0.0f);
+                pos.x = modelo.vertices()->at(i).position.x;
+                pos.y = modelo.vertices()->at(i).position.y;
+                pos.z = modelo.vertices()->at(i).position.z;
+
+		        vec3 n = normalizeVector(pos);
+
+        		vec3 p = radius * n;
+
+                float color[3] = {
+                    static_cast <float> (rand()) / static_cast <float> (RAND_MAX),
+		            static_cast <float> (rand()) / static_cast <float> (RAND_MAX),
+		            static_cast <float> (rand()) / static_cast <float> (RAND_MAX)
+                };
+
+		        modelo.vertices()->at(i).position.x = p.x;
+                modelo.vertices()->at(i).position.y = p.y;
+                modelo.vertices()->at(i).position.z = p.z;
+                modelo.vertices()->at(i).color = color;
+	        }
+
+        }
+
+
+        void subdivide(MeshData::Mesh& modelo){
+            MeshData::Mesh& copy = modelo;
+
+            modelo.indices()->clear();
+            modelo.vertices()->clear();
+
+            unsigned int numTris = copy.indices()->size() / 3;
+            for (unsigned int i = 0; i < numTris; ++i)
+            {
+                
+                MeshData::Vertex v0 = copy.vertices()->at(copy.indices()->at(i * 3 + 0));
+                MeshData::Vertex v1 = copy.vertices()->at(copy.indices()->at(i * 3 + 1));
+                MeshData::Vertex v2 = copy.vertices()->at(copy.indices()->at(i * 3 + 2));
+
+
+                MeshData::Vertex m0, m1, m2;
+
+                m0.position.x = 0.5f*(v0.position.x + v1.position.x);
+                m0.position.x = 0.5f*(v0.position.y + v1.position.y),
+                m0.position.x = 0.5f*(v0.position.z + v1.position.z);
+
+                m1.position.x = 0.5f*(v1.position.x + v2.position.x);
+                m1.position.y = 0.5f*(v1.position.y + v2.position.y);
+                m1.position.z = 0.5f*(v1.position.z + v2.position.z);
+
+                m2.position.x = 0.5f*(v0.position.x + v2.position.x);
+                m2.position.y = 0.5f*(v0.position.y + v2.position.y);
+                m2.position.z = 0.5f*(v0.position.z + v2.position.z);
+
+                modelo.vertices()->push_back(v0); // 0
+                modelo.vertices()->push_back(v1); // 1
+                modelo.vertices()->push_back(v2); // 2
+                modelo.vertices()->push_back(m0); // 3
+                modelo.vertices()->push_back(m1); // 4
+                modelo.vertices()->push_back(m2); // 5
+
+                modelo.indices()->push_back(i * 6 + 0);
+                modelo.indices()->push_back(i * 6 + 3);
+                modelo.indices()->push_back(i * 6 + 5);
+
+                modelo.indices()->push_back(i * 6 + 3);
+                modelo.indices()->push_back(i * 6 + 4);
+                modelo.indices()->push_back(i * 6 + 5);
+
+                modelo.indices()->push_back(i * 6 + 5);
+                modelo.indices()->push_back(i * 6 + 4);
+                modelo.indices()->push_back(i * 6 + 2);
+
+                modelo.indices()->push_back(i * 6 + 3);
+                modelo.indices()->push_back(i * 6 + 1);
+                modelo.indices()->push_back(i * 6 + 4);
+            }
+        }
+
+
+        float getHeight(float x, float z){return 0.3*(z*sinf(0.1f*x) + x*cosf(0.1f*z));}
+        glm::vec3 getHillNormal(float x, float z){
+            glm::vec3 p = glm::vec3(
+                -0.03f*z*cosf(0.1f*x) - 0.3f*cosf(0.1f*z),
+		        1.0f,
+		        -0.3f*sinf(0.1f*x) + 0.03f*x*sinf(0.1f*z));
+            
+            return p;
         }
     };
 }
